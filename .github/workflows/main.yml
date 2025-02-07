@@ -1,0 +1,38 @@
+# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Jekyll
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  test:
+    name: Test & Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # https://github.com/facebook/docusaurus/issues/2798#issuecomment-636602951
+      - name: Bundle Config
+        run: |
+          sudo gem install bundler
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: package.json
+      - name: NPM Install
+        run: npm install
+      - name: Debug
+        run: |
+          git log --since="1 week ago" --name-only --pretty=format: | sort | uniq
+          git log --since="1 week ago" --name-only --pretty=format: | sort | uniq | wc -l
+      - name: NPM Test
+        run: npm test
+      - name: Install Dependencies
+        run: make install
+      - name: Build
+        run: npm run build
